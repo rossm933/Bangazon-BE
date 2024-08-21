@@ -8,6 +8,7 @@
         public int UserId { get; set; }
         public string? PaymentType { get; set; }
         public bool Status { get; set; }
+        public Product? Product { get; set; }
 
 
     }
