@@ -45,7 +45,7 @@ namespace Bangazon_BE
             app.UseHttpsRedirection();
 
             app.UseAuthorization();
-
+            // PRODUCTS
             // Get all products
             app.MapGet("/products", (BangazonDbContext db) =>
             {
@@ -64,6 +64,7 @@ namespace Bangazon_BE
                 return Results.Ok(selectedProduct);
             });
 
+            // USERS
             // Get all users
             app.MapGet("/users", (BangazonDbContext db) =>
             {
@@ -80,6 +81,7 @@ namespace Bangazon_BE
                 return Results.Ok(selectedUser);
             });
 
+            // ORDERS 
             // Get all orders   
             app.MapGet("/orders", (BangazonDbContext db) =>
             {
@@ -93,7 +95,23 @@ namespace Bangazon_BE
                 return order;
             });
 
+            // Delete Order
+            app.MapDelete("/orders/{id}", (BangazonDbContext db, int id) =>
+            {
+                var order = db.Orders.SingleOrDefault(order => order.OrderId == id);
 
+                if (order == null)
+                {
+                    return Results.NotFound();
+                }
+
+                db.Orders.Remove(order);
+                db.SaveChanges();
+                return Results.NoContent();
+            });
+
+
+            // ORDERITEM
 
             app.Run();
         }
