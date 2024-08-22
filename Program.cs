@@ -46,11 +46,22 @@ namespace Bangazon_BE
 
             app.UseAuthorization();
 
-            // Get all posts
+            // Get all products
             app.MapGet("/products", (BangazonDbContext db) =>
             {
                 var orderedProducts = db.Products.OrderByDescending(c => c.DateAdded).ToList();
                 return Results.Ok(orderedProducts);
+            });
+
+            // Get a product by id
+            app.MapGet("/products/{id}", (BangazonDbContext db, int id) =>
+            {
+                Product selectedProduct = db.Products.FirstOrDefault(p => p.ProductId == id);
+                if (selectedProduct == null)
+                {
+                    return Results.NotFound();
+                }
+                return Results.Ok(selectedProduct);
             });
 
             app.Run();
