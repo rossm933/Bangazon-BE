@@ -64,6 +64,23 @@ namespace Bangazon_BE
                 return Results.Ok(selectedProduct);
             });
 
+            // Get all users
+            app.MapGet("/users", (BangazonDbContext db) =>
+            {
+                return db.Users.ToList();
+            });
+
+            // Get user by id
+            app.MapGet("/users/{id}", (BangazonDbContext db, int id) => {
+                User selectedUser = db.Users.FirstOrDefault(u => u.UserId == id);
+                if (selectedUser == null)
+                {
+                    return Results.NotFound();
+                }
+                return Results.Ok(selectedUser);
+            });
+
+
             app.Run();
         }
     }
