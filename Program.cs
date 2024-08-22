@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Bangazon_BE.Models;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Http.Json;
+using Microsoft.Extensions.Hosting;
 
 namespace Bangazon_BE
 {
@@ -45,7 +46,12 @@ namespace Bangazon_BE
 
             app.UseAuthorization();
 
-
+            // Get all posts
+            app.MapGet("/products", (BangazonDbContext db) =>
+            {
+                var orderedProducts = db.Products.OrderByDescending(c => c.DateAdded).ToList();
+                return Results.Ok(orderedProducts);
+            });
 
             app.Run();
         }
