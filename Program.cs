@@ -1,11 +1,29 @@
 
+using Microsoft.EntityFrameworkCore;
+using Bangazon_BE.Models;
+using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Http.Json;
+
 namespace Bangazon_BE
 {
     public class Program
     {
         public static void Main(string[] args)
         {
+
             var builder = WebApplication.CreateBuilder(args);
+
+            // allows passing datetimes without time zone data 
+            AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+
+            // allows our api endpoints to access the database through Entity Framework Core
+            builder.Services.AddNpgsql<BangazonDbContext>(builder.Configuration["BangazonDbConnectionString"]);
+
+            // Set the JSON serializer options
+            builder.Services.Configure<JsonOptions>(options =>
+            {
+                options.SerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+            });
 
             // Add services to the container.
             builder.Services.AddAuthorization();
