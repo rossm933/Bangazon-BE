@@ -89,7 +89,6 @@ namespace Bangazon_BE
         {
                 OrderId = 1,
                 OrderDate = new DateTime(2024, 8, 15),
-                TotalAmount = 199.99m,
                 UserId = 1,
                 PaymentType = "Debit",
                 Status = true,
@@ -97,12 +96,11 @@ namespace Bangazon_BE
 
         new Order
         {
-            OrderId = 2,
-            OrderDate = new DateTime(2024, 8, 18),
-            TotalAmount = 349.99m,
-            UserId = 2,
-            PaymentType = "Credit",
-            Status = false,
+                OrderId = 2,
+                OrderDate = new DateTime(2024, 8, 18),
+                UserId = 2,
+                PaymentType = "Credit",
+                Status = true,
         }
     });
         }

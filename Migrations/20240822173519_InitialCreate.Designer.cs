@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Bangazon_BE.Migrations
 {
     [DbContext(typeof(BangazonDbContext))]
-    [Migration("20240822005955_InitialCreate")]
+    [Migration("20240822173519_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -44,10 +44,9 @@ namespace Bangazon_BE.Migrations
                     b.Property<int>("UserId")
                         .HasColumnType("integer");
 
-                    b.Property<decimal>("totalAmount")
-                        .HasColumnType("numeric");
-
                     b.HasKey("OrderId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Orders");
 
@@ -58,17 +57,15 @@ namespace Bangazon_BE.Migrations
                             OrderDate = new DateTime(2024, 8, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             PaymentType = "Debit",
                             Status = true,
-                            UserId = 1,
-                            totalAmount = 199.99m
+                            UserId = 1
                         },
                         new
                         {
                             OrderId = 2,
                             OrderDate = new DateTime(2024, 8, 18, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             PaymentType = "Credit",
-                            Status = false,
-                            UserId = 2,
-                            totalAmount = 349.99m
+                            Status = true,
+                            UserId = 2
                         });
                 });
 
@@ -89,6 +86,9 @@ namespace Bangazon_BE.Migrations
                     b.Property<string>("ImageUrl")
                         .HasColumnType("text");
 
+                    b.Property<int?>("OrderId")
+                        .HasColumnType("integer");
+
                     b.Property<decimal>("Price")
                         .HasColumnType("numeric");
 
@@ -103,7 +103,7 @@ namespace Bangazon_BE.Migrations
 
                     b.HasKey("ProductId");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("OrderId");
 
                     b.ToTable("Products");
 
@@ -208,15 +208,30 @@ namespace Bangazon_BE.Migrations
                         });
                 });
 
-            modelBuilder.Entity("Bangazon_BE.Models.Product", b =>
+            modelBuilder.Entity("Bangazon_BE.Models.Order", b =>
                 {
-                    b.HasOne("Bangazon_BE.Models.User", "User")
-                        .WithMany()
+                    b.HasOne("Bangazon_BE.Models.User", null)
+                        .WithMany("Orders")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
 
-                    b.Navigation("User");
+            modelBuilder.Entity("Bangazon_BE.Models.Product", b =>
+                {
+                    b.HasOne("Bangazon_BE.Models.Order", null)
+                        .WithMany("Products")
+                        .HasForeignKey("OrderId");
+                });
+
+            modelBuilder.Entity("Bangazon_BE.Models.Order", b =>
+                {
+                    b.Navigation("Products");
+                });
+
+            modelBuilder.Entity("Bangazon_BE.Models.User", b =>
+                {
+                    b.Navigation("Orders");
                 });
 #pragma warning restore 612, 618
         }

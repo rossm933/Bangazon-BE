@@ -80,6 +80,20 @@ namespace Bangazon_BE
                 return Results.Ok(selectedUser);
             });
 
+            // Get all orders   
+            app.MapGet("/orders", (BangazonDbContext db) =>
+            {
+                return db.Orders.ToList();
+            });
+
+            // Get order by UserId
+            app.MapGet("/user/{UserId}/orders", (BangazonDbContext db, int UserId) =>
+            {
+                var order = db.Orders.Where(order => order.UserId == UserId && order.Status).ToList();
+                return order;
+            });
+
+
 
             app.Run();
         }
