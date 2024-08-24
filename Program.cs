@@ -64,6 +64,13 @@ namespace Bangazon_BE
                     return Results.NotFound();
                 }
                 return Results.Ok(selectedProduct);
+
+            });
+
+            //Get products by category
+            app.MapGet("/products/category/{categoryId}", (BangazonDbContext db, int categoryId) =>
+            {
+                return db.Products.Where(product => product.CategoryId == categoryId).ToList();
             });
 
             // USERS
@@ -165,7 +172,17 @@ namespace Bangazon_BE
                 db.SaveChanges();
                 return Results.NoContent();
             });
-            // ORDERITEM
+            // Categories
+            app.MapGet("/categories", (BangazonDbContext db) =>
+            {
+                return db.Categories.ToList();
+            });
+
+            app.MapGet("/categories/{id}", (BangazonDbContext db, int id) =>
+            {
+                var category = db.Categories.SingleOrDefault(category => category.CategoryId == id);
+                return category.CategoryType;
+            });
 
 
             app.Run();
