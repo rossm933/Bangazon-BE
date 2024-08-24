@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Bangazon_BE.Migrations
 {
     [DbContext(typeof(BangazonDbContext))]
-    [Migration("20240822173519_InitialCreate")]
+    [Migration("20240824161013_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -23,6 +23,44 @@ namespace Bangazon_BE.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+
+            modelBuilder.Entity("Bangazon_BE.Models.Category", b =>
+                {
+                    b.Property<int>("CategoryId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("CategoryId"));
+
+                    b.Property<string>("CategoryType")
+                        .HasColumnType("text");
+
+                    b.HasKey("CategoryId");
+
+                    b.ToTable("Categories");
+
+                    b.HasData(
+                        new
+                        {
+                            CategoryId = 1,
+                            CategoryType = "Accessories"
+                        },
+                        new
+                        {
+                            CategoryId = 2,
+                            CategoryType = "Electronics"
+                        },
+                        new
+                        {
+                            CategoryId = 3,
+                            CategoryType = "Shoes"
+                        },
+                        new
+                        {
+                            CategoryId = 4,
+                            CategoryType = "Clothes"
+                        });
+                });
 
             modelBuilder.Entity("Bangazon_BE.Models.Order", b =>
                 {
@@ -69,6 +107,39 @@ namespace Bangazon_BE.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Bangazon_BE.Models.Payment", b =>
+                {
+                    b.Property<int>("PaymentId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("PaymentId"));
+
+                    b.Property<string>("PaymentType")
+                        .HasColumnType("text");
+
+                    b.HasKey("PaymentId");
+
+                    b.ToTable("Payment");
+
+                    b.HasData(
+                        new
+                        {
+                            PaymentId = 1,
+                            PaymentType = "Credit"
+                        },
+                        new
+                        {
+                            PaymentId = 2,
+                            PaymentType = "Debit"
+                        },
+                        new
+                        {
+                            PaymentId = 3,
+                            PaymentType = "Paypal"
+                        });
+                });
+
             modelBuilder.Entity("Bangazon_BE.Models.Product", b =>
                 {
                     b.Property<int>("ProductId")
@@ -76,6 +147,9 @@ namespace Bangazon_BE.Migrations
                         .HasColumnType("integer");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ProductId"));
+
+                    b.Property<int>("CategoryId")
+                        .HasColumnType("integer");
 
                     b.Property<DateTime>("DateAdded")
                         .HasColumnType("timestamp without time zone");
@@ -85,9 +159,6 @@ namespace Bangazon_BE.Migrations
 
                     b.Property<string>("ImageUrl")
                         .HasColumnType("text");
-
-                    b.Property<int?>("OrderId")
-                        .HasColumnType("integer");
 
                     b.Property<decimal>("Price")
                         .HasColumnType("numeric");
@@ -103,14 +174,13 @@ namespace Bangazon_BE.Migrations
 
                     b.HasKey("ProductId");
 
-                    b.HasIndex("OrderId");
-
                     b.ToTable("Products");
 
                     b.HasData(
                         new
                         {
                             ProductId = 1,
+                            CategoryId = 2,
                             DateAdded = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Description = "High-quality noise-cancelling headphones with 30 hours of battery life.",
                             ImageUrl = "https://media.post.rvohealth.io/2bjbp5lKTXFqsC1IaBRaVKnftUC/2024/02/23/2clpfwiF94A9rR20V9ES0nyh03C.jpeg",
@@ -122,17 +192,19 @@ namespace Bangazon_BE.Migrations
                         new
                         {
                             ProductId = 2,
+                            CategoryId = 3,
                             DateAdded = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Description = "27-inch monitor with vibrant colors and fast response time, perfect for gaming and productivity.",
-                            ImageUrl = "https://cdn.thewirecutter.com/wp-content/media/2023/06/4kmonitors-2048px-9794.jpg",
-                            Price = 349.99m,
+                            Description = "This athletic shoe combines style and performance, featuring a lightweight design with breathable mesh uppers for maximum ventilation.",
+                            ImageUrl = "https://static.nike.com/a/images/t_PDP_936_v1/f_auto,q_auto:eco/b1bcbca4-e853-4df7-b329-5be3c61ee057/NIKE+DUNK+LOW+RETRO.png",
+                            Price = 89.99m,
                             QuantityAvailable = 30,
-                            Title = "4K Ultra HD Monitor",
+                            Title = "Nike Shoes",
                             UserId = 1
                         },
                         new
                         {
                             ProductId = 3,
+                            CategoryId = 2,
                             DateAdded = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Description = "RGB backlit keyboard with customizable keys and fast response switches.",
                             ImageUrl = "https://m.media-amazon.com/images/I/61+O1VNp1-L._AC_UF894,1000_QL80_.jpg",
@@ -144,20 +216,22 @@ namespace Bangazon_BE.Migrations
                         new
                         {
                             ProductId = 4,
+                            CategoryId = 1,
                             DateAdded = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Description = "15.6-inch gaming laptop with Intel i7 processor, 16GB RAM, and NVIDIA GTX 1660 Ti graphics card.",
-                            ImageUrl = "https://i.pcmag.com/imagery/reviews/043DROGFihmSgG7S6LUb006-1..v1709854231.jpg",
-                            Price = 1199.99m,
+                            Description = "\r\nThis sleek and stylish watch is the perfect blend of form and function. Featuring a durable stainless steel case and a scratch-resistant crystal, it is designed to withstand everyday wear while maintaining its elegant look. .",
+                            ImageUrl = "https://fossil.scene7.com/is/image/FossilPartners/BQ2457_main?$sfcc_fos_large$",
+                            Price = 119.99m,
                             QuantityAvailable = 20,
-                            Title = "High-Performance Gaming Laptop",
+                            Title = "Watch",
                             UserId = 1
                         },
                         new
                         {
                             ProductId = 5,
+                            CategoryId = 0,
                             DateAdded = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Description = "Fast wireless charger compatible with all Qi-enabled devices.",
-                            ImageUrl = "https://m.media-amazon.com/images/I/51YD0CM1PnL._AC_UF894,1000_QL80_.jpg",
+                            Description = "These versatile pants are designed for both comfort and style, making them a perfect addition to any wardrobe.",
+                            ImageUrl = "https://i.ebayimg.com/images/g/BEcAAOSwlVpgXpQy/s-l1200.jpg",
                             Price = 39.99m,
                             QuantityAvailable = 100,
                             Title = "Wireless Charging Pad",
@@ -208,6 +282,21 @@ namespace Bangazon_BE.Migrations
                         });
                 });
 
+            modelBuilder.Entity("OrderProduct", b =>
+                {
+                    b.Property<int>("OrdersOrderId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ProductsProductId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("OrdersOrderId", "ProductsProductId");
+
+                    b.HasIndex("ProductsProductId");
+
+                    b.ToTable("OrderProduct", (string)null);
+                });
+
             modelBuilder.Entity("Bangazon_BE.Models.Order", b =>
                 {
                     b.HasOne("Bangazon_BE.Models.User", null)
@@ -217,16 +306,19 @@ namespace Bangazon_BE.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Bangazon_BE.Models.Product", b =>
+            modelBuilder.Entity("OrderProduct", b =>
                 {
                     b.HasOne("Bangazon_BE.Models.Order", null)
-                        .WithMany("Products")
-                        .HasForeignKey("OrderId");
-                });
+                        .WithMany()
+                        .HasForeignKey("OrdersOrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-            modelBuilder.Entity("Bangazon_BE.Models.Order", b =>
-                {
-                    b.Navigation("Products");
+                    b.HasOne("Bangazon_BE.Models.Product", null)
+                        .WithMany()
+                        .HasForeignKey("ProductsProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Bangazon_BE.Models.User", b =>

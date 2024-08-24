@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Bangazon_BE.Models;
+using static System.Net.WebRequestMethods;
 
 namespace Bangazon_BE
 {
@@ -8,6 +9,9 @@ namespace Bangazon_BE
         public DbSet<User> Users { get; set; }
         public DbSet<Product> Products { get; set; }
         public DbSet<Order> Orders { get; set; }
+        public DbSet<Category> Categories { get; set; }
+
+        public DbSet<Payment> Payment { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<User>().HasData(new User[]
@@ -41,16 +45,18 @@ namespace Bangazon_BE
                 Price = 199.99m,
                 QuantityAvailable = 50,
                 UserId = 2,
-        },
+                CategoryId = 2,
+    },
         new Product
         {
                 ProductId = 2,
-                Title = "4K Ultra HD Monitor",
-                ImageUrl = "https://cdn.thewirecutter.com/wp-content/media/2023/06/4kmonitors-2048px-9794.jpg",
-                Description = "27-inch monitor with vibrant colors and fast response time, perfect for gaming and productivity.",
-                Price = 349.99m,
+                Title = "Nike Shoes",
+                ImageUrl = "https://static.nike.com/a/images/t_PDP_936_v1/f_auto,q_auto:eco/b1bcbca4-e853-4df7-b329-5be3c61ee057/NIKE+DUNK+LOW+RETRO.png",
+                Description = "This athletic shoe combines style and performance, featuring a lightweight design with breathable mesh uppers for maximum ventilation.",
+                Price = 89.99m,
                 QuantityAvailable = 30,
                 UserId = 1,
+                CategoryId = 3,
         },
         new Product
         {
@@ -61,23 +67,25 @@ namespace Bangazon_BE
                 Price = 129.99m,
                 QuantityAvailable = 75,
                 UserId = 1,
+                CategoryId = 2,
         },
         new Product
         {
                 ProductId = 4,
-                Title = "High-Performance Gaming Laptop",
-                ImageUrl = "https://i.pcmag.com/imagery/reviews/043DROGFihmSgG7S6LUb006-1..v1709854231.jpg",
-                Description = "15.6-inch gaming laptop with Intel i7 processor, 16GB RAM, and NVIDIA GTX 1660 Ti graphics card.",
-                Price = 1199.99m,
+                Title = "Watch",
+                ImageUrl = "https://fossil.scene7.com/is/image/FossilPartners/BQ2457_main?$sfcc_fos_large$",
+                Description = "\r\nThis sleek and stylish watch is the perfect blend of form and function. Featuring a durable stainless steel case and a scratch-resistant crystal, it is designed to withstand everyday wear while maintaining its elegant look. .",
+                Price = 119.99m,
                 QuantityAvailable = 20,
                 UserId = 1,
+                CategoryId = 1,
         },
         new Product
         {
                 ProductId = 5,
                 Title = "Wireless Charging Pad",
-                ImageUrl = "https://m.media-amazon.com/images/I/51YD0CM1PnL._AC_UF894,1000_QL80_.jpg",
-                Description = "Fast wireless charger compatible with all Qi-enabled devices.",
+                ImageUrl = "https://i.ebayimg.com/images/g/BEcAAOSwlVpgXpQy/s-l1200.jpg",
+                Description = "These versatile pants are designed for both comfort and style, making them a perfect addition to any wardrobe.",
                 Price = 39.99m,
                 QuantityAvailable = 100,
                 UserId = 2,
@@ -103,7 +111,58 @@ namespace Bangazon_BE
                 Status = true,
         }
     });
+            modelBuilder.Entity<Category>().HasData(new Category[]
+            {
+                new Category
+                {
+                    CategoryId = 1,
+                    CategoryType = "Accessories"
+                },
+                
+                new Category
+                {
+                    CategoryId = 2,
+                    CategoryType = "Electronics"
+                },
+                
+                new Category
+                {
+                    CategoryId = 3,
+                    CategoryType = "Shoes"
+                },
+                new Category
+                {
+                    CategoryId = 4,
+                    CategoryType = "Clothes"
+                }
+
+            });
+            modelBuilder.Entity<Payment>().HasData(new Payment[]
+            {
+                new Payment {
+                    PaymentId = 1,
+                    PaymentType = "Credit", 
+                },
+                new Payment {
+                    PaymentId = 2,
+                    PaymentType = "Debit",
+                },
+                new Payment {
+                    PaymentId = 3,
+                    PaymentType = "Paypal",
+                }
+                });
+
+
+
+
+           modelBuilder.Entity<Order>()
+           .HasMany(order => order.Products)
+           .WithMany(product => product.Orders)
+           .UsingEntity(x => x.ToTable("OrderProduct"));
+
         }
+
         public BangazonDbContext(DbContextOptions<BangazonDbContext> context) : base(context)
         {
 
