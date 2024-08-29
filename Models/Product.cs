@@ -13,9 +13,11 @@ namespace Bangazon_BE.Models
         public int CategoryId { get; set; }
 
         public DateTime DateAdded { get; set; }
-        public int UserId { get; set; }
+        public string? Uid { get; set; }
 
         public List<Order>? Orders { get; set; }
+
+         public Category? Category { get; set; }
 
     }
 }

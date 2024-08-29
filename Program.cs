@@ -35,6 +35,15 @@ namespace Bangazon_BE
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowSpecificOrigin",
+                    builder => builder
+                        .WithOrigins("http://localhost:3001")
+                        .AllowAnyMethod()
+                        .AllowAnyHeader()
+                        .AllowCredentials());
+            });
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -45,25 +54,30 @@ namespace Bangazon_BE
             }
 
             app.UseHttpsRedirection();
-
+            app.UseCors("AllowSpecificOrigin");
             app.UseAuthorization();
+
             // PRODUCTS
             // Get all products
             app.MapGet("/products", (BangazonDbContext db) =>
             {
-                var orderedProducts = db.Products.OrderByDescending(c => c.DateAdded).ToList();
-                return Results.Ok(orderedProducts);
+                return db.Products.Include(p => p.Category).ToList();
+
             });
 
             // Get a product by id
-            app.MapGet("/products/{id}", (BangazonDbContext db, int id) =>
+            app.MapGet("/products/{productId}", (BangazonDbContext db, int productId) =>
             {
-                Product selectedProduct = db.Products.FirstOrDefault(p => p.ProductId == id);
-                if (selectedProduct == null)
+                var product = db.Products
+                                .Include(p => p.Category)
+                                .SingleOrDefault(u => u.ProductId == productId);
+
+                if (product == null)
                 {
                     return Results.NotFound();
                 }
-                return Results.Ok(selectedProduct);
+
+                return Results.Ok(product);
 
             });
 
@@ -81,109 +95,151 @@ namespace Bangazon_BE
             });
 
             // Get user by id
-            app.MapGet("/users/{UserId}", (BangazonDbContext db, int id) => {
-                User selectedUser = db.Users.FirstOrDefault(u => u.UserId == id);
+            app.MapGet("/users/{Id}", (BangazonDbContext db, int id) => {
+                User selectedUser = db.Users.FirstOrDefault(u => u.Id == id);
                 if (selectedUser == null)
                 {
                     return Results.NotFound();
                 }
                 return Results.Ok(selectedUser);
             });
+            // Check user
+            app.MapGet("/checkuser/{uid}", (BangazonDbContext db, string uid) =>
+            {
+                var user = db.Users.Where(user => user.Uid == uid).ToList();
+
+                if (uid == null)
+                {
+                    return Results.NotFound("User not registered");
+                }
+
+                return Results.Ok(user);
+            });
+
+            // Register user
+            app.MapPost("/register", (BangazonDbContext db, User newUser) =>
+            {
+                try
+                {
+                    db.Users.Add(newUser);
+                    db.SaveChanges();
+                    return Results.Created($"/user/{newUser.Id}", newUser);
+                }
+                catch (DbUpdateException)
+                {
+                    return Results.BadRequest("Couldn't create new user, please try again!");
+                }
+            });
+
 
             // ORDERS 
             // Get all orders   
             app.MapGet("/orders", (BangazonDbContext db) =>
             {
-                return db.Orders.ToList();
+                // Include PaymentType to retrieve related information
+                return db.Orders.Include(o => o.PaymentType).ToList();
             });
 
-            // Get order by UserId
-            app.MapGet("/user/{UserId}/orders", (BangazonDbContext db, int UserId) =>
+            app.MapGet("/orders/{id}/products", (BangazonDbContext db, int id) =>
             {
-                var order = db.Orders.Where(order => order.UserId == UserId && order.Status).ToList();
-                return order;
+                var Order = db.Orders.Include(o => o.Products).FirstOrDefault(o => o.OrderId == id);
+                return Order;
             });
+
+
+            // get order details (products)
+            app.MapGet("/products/{id}/orders", (BangazonDbContext db, int id) =>
+            {
+                var product = db.Products.Include(p => p.Orders).FirstOrDefault(p => p.ProductId == id);
+                return product;
+            });
+
 
             // Delete Order
             app.MapDelete("/orders/{id}", (BangazonDbContext db, int id) =>
             {
-                var order = db.Orders.SingleOrDefault(order => order.OrderId == id);
+                Order orderToDelete = db.Orders.SingleOrDefault(p => p.OrderId == id);
+                if (orderToDelete == null)
+                {
+                    return Results.NotFound();
+                }
+                db.Orders.Remove(orderToDelete);
+                db.SaveChanges();
+                return Results.Ok(db.Orders);
+            });
+            // Delete product from order
+            app.MapDelete("/orders/{orderId}/products/{productId}", (BangazonDbContext db, int orderId, int productId) =>
+            {
+                var order = db.Orders.Include(o => o.Products).SingleOrDefault(o => o.OrderId == orderId);
 
                 if (order == null)
                 {
-                    return Results.NotFound();
+                    return Results.NotFound("Order not found.");
                 }
 
-                db.Orders.Remove(order);
-                db.SaveChanges();
-                return Results.NoContent();
-            });
-            // Delete product from oder
+                var removeProduct = order.Products.FirstOrDefault(p => p.ProductId == productId);
 
-            app.MapDelete("/orders/{orderId}/products/{productId}", (BangazonDbContext db, int orderId, int productId) =>
-            {
-                var order = db.Orders.Include(o => o.Products).FirstOrDefault(o => o.OrderId == orderId);
-                var product = db.Products.Find(productId);
-
-                if (order == null || product == null)
+                if (removeProduct == null)
                 {
-                    return Results.NotFound("Invalid data request");
+                    return Results.NotFound("Product not found.");
                 }
 
-                order.Products.Remove(product);
+                order.Products.Remove(removeProduct);
                 db.SaveChanges();
-                return Results.NoContent();
+                return Results.Ok("Product removed from order.");
             });
+
             // Add product to order
-            app.MapPost("/orders/add", (BangazonDbContext db, CartDTO newItem) =>
+            app.MapPost("/orders/addProduct", (BangazonDbContext db, CartDTO newProduct) =>
             {
-                var order = db.Orders.Include(o => o.Products).FirstOrDefault(o => o.OrderId == newItem.OrderId);
-                var productToAdd = db.Products.Find(newItem.ProductId);
+                var order = db.Orders.Include(o => o.Products).FirstOrDefault(o => o.OrderId == newProduct.OrderId);
 
-                if (order == null || productToAdd == null)
+                if (order == null)
                 {
-                    return Results.NotFound();
+                    return Results.NotFound("Order not found.");
                 }
 
-                try
-                {
-                    order.Products.Add(productToAdd);
-                    db.SaveChanges();
-                    return Results.Created($"/api/orders/{newItem.OrderId}/products/{newItem.ProductId}", productToAdd);
-                }
-                catch
-                {
-                    return Results.BadRequest("There was an error with the data submitted");
-                }
-            });
-            // Update order
-            app.MapPut("/orders/{id}", (BangazonDbContext db, int id, Order order) =>
-            {
-                Order orderToUpdate = db.Orders.SingleOrDefault(order => order.OrderId == id);
-                if (orderToUpdate == null)
-                {
-                    return Results.NotFound();
-                }
-                orderToUpdate.Products = order.Products;
-                orderToUpdate.Status = order.Status;
-                orderToUpdate.PaymentType = order.PaymentType;
+                var product = db.Products.Find(newProduct.ProductId);
 
+                if (product == null)
+                {
+                    return Results.NotFound("Product not found.");
+                }
+
+                var existingProduct = order.Products.FirstOrDefault(p => p.ProductId == newProduct.ProductId);
+
+                if (existingProduct != null)
+                {
+                    existingProduct.QuantityAvailable += newProduct.QuantityAvailable;
+                }
+                else
+                {
+                    product.QuantityAvailable = newProduct.QuantityAvailable;
+                    order.Products.Add(product);
+                }
 
                 db.SaveChanges();
-                return Results.NoContent();
-            });
-            // Categories
-            app.MapGet("/categories", (BangazonDbContext db) =>
-            {
-                return db.Categories.ToList();
+
+                return Results.Created($"/orders/addProduct", newProduct);
             });
 
+            // Categories
+            // Get all categories
+            app.MapGet("/category", (BangazonDbContext db) =>
+            {
+                return db.Category.ToList();
+            });
+            // Get category by id
             app.MapGet("/categories/{id}", (BangazonDbContext db, int id) =>
             {
-                var category = db.Categories.SingleOrDefault(category => category.CategoryId == id);
-                return category.CategoryType;
+                var category = db.Category.SingleOrDefault(category => category.Id == id);
+                return category.Name;
             });
-
+            //Payment
+            app.MapGet("/paymentType", (BangazonDbContext db) =>
+            {
+                return db.PaymentTypes.ToList();
+            });
 
             app.Run();
         }
