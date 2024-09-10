@@ -39,7 +39,7 @@ namespace Bangazon_BE
             {
                 options.AddPolicy("AllowSpecificOrigin",
                     builder => builder
-                        .WithOrigins("http://localhost:3001")
+                        .WithOrigins("http://localhost:3000")
                         .AllowAnyMethod()
                         .AllowAnyHeader()
                         .AllowCredentials());
@@ -106,32 +106,49 @@ namespace Bangazon_BE
             // Check user
             app.MapGet("/checkuser/{uid}", (BangazonDbContext db, string uid) =>
             {
-                var user = db.Users.Where(user => user.Uid == uid).ToList();
-
-                if (uid == null)
+                var authUser = db.Users.Where(u => u.Uid == uid).FirstOrDefault();
+                if (authUser == null)
                 {
-                    return Results.NotFound("User not registered");
+                    return Results.StatusCode(204);
+                }
+                return Results.Ok(authUser);
+            });
+
+            // Register user
+            app.MapPost("/users", (BangazonDbContext db, User userInfo) =>
+            {
+                db.Users.Add(userInfo);
+                db.SaveChanges();
+                return Results.Created($"/users/{userInfo.Id}", userInfo);
+            });
+            // Get user by Id
+            app.MapGet("/users/details/{uid}", (BangazonDbContext db, string uid) =>
+            {
+
+                User user = db.Users.FirstOrDefault(u => u.Uid == uid);
+
+                if (user == null)
+                {
+                    return Results.NotFound();
                 }
 
                 return Results.Ok(user);
             });
-
-            // Register user
-            app.MapPost("/register", (BangazonDbContext db, User newUser) =>
+            // Switch user to seller
+            app.MapPatch("/users/sell/{uid}", async (BangazonDbContext db, string uid) =>
             {
-                try
+                User user = db.Users.SingleOrDefault(u => u.Uid == uid);
+
+                if (user == null)
                 {
-                    db.Users.Add(newUser);
-                    db.SaveChanges();
-                    return Results.Created($"/user/{newUser.Id}", newUser);
+                    return Results.NotFound();
                 }
-                catch (DbUpdateException)
-                {
-                    return Results.BadRequest("Couldn't create new user, please try again!");
-                }
+
+                user.Seller = true;
+                await db.SaveChangesAsync();
+
+                return Results.Ok(user);
             });
-
-
             // ORDERS 
             // Get all orders   
             app.MapGet("/orders", (BangazonDbContext db) =>

@@ -12,6 +12,8 @@ namespace Bangazon_BE.Models
         public int QuantityAvailable { get; set; }
         public int CategoryId { get; set; }
 
+        public int SellerId { get; set; }
+
         public DateTime DateAdded { get; set; }
         public string? Uid { get; set; }
 

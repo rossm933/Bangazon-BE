@@ -19,21 +19,25 @@ namespace Bangazon_BE
                 {
                     new User
                     {
-                            Id = 1,
-                            Uid = "",
-                            Name = "Ross Morgan",
-                            Email = "ross.morgan@gmail.com",
-                            Seller = false,
-                            Password = "SecurePassword123"
+                        Id = 1, 
+                        Uid = "", 
+                        FirstName = "Ross", 
+                        LastName = "Morgan", 
+                        UserName = "rmorgan", 
+                        Address = "334 South Street", 
+                        Email = "ross.m@coding.com", 
+                        Seller = false
                     },
                     new User
                     {
-                            Id = 2,
-                            Uid = "",
-                            Name = "Andrew Smith",
-                            Email = "andrew.smith@example.com",
-                            Seller = false,
-                            Password = "AnotherSecurePassword456"
+                        Id = 2,
+                        Uid = "",
+                        FirstName = "Andrew",
+                        LastName = "Smith",
+                        UserName = "mastercoder",
+                        Address = "567 North Street",
+                        Email = "asmith@coding.com",
+                        Seller = true
                     }
 
                 });
@@ -49,6 +53,7 @@ namespace Bangazon_BE
                 QuantityAvailable = 50,
                 Uid = "",
                 CategoryId = 2,
+                SellerId = 1,
     },
         new Product
         {
@@ -60,6 +65,8 @@ namespace Bangazon_BE
                 QuantityAvailable = 30,
                 Uid = "",
                 CategoryId = 3,
+                SellerId = 1,
+
         },
         new Product
         {
@@ -71,6 +78,8 @@ namespace Bangazon_BE
                 QuantityAvailable = 75,
                 Uid = "",
                 CategoryId = 2,
+                SellerId = 1,
+
         },
         new Product
         {
@@ -82,6 +91,7 @@ namespace Bangazon_BE
                 QuantityAvailable = 20,
                 Uid = "",
                 CategoryId = 1,
+                SellerId = 2,
         },
         new Product
         {
@@ -93,6 +103,7 @@ namespace Bangazon_BE
                 QuantityAvailable = 100,
                 Uid = "",
                 CategoryId = 2,
+                SellerId = 2,
 
         }
     });
