@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Bangazon_BE.Models;
+using static System.Net.WebRequestMethods;
 
 namespace Bangazon_BE
 {
@@ -8,25 +9,35 @@ namespace Bangazon_BE
         public DbSet<User> Users { get; set; }
         public DbSet<Product> Products { get; set; }
         public DbSet<Order> Orders { get; set; }
+        public DbSet<Category> Category { get; set; }
+
+        public DbSet<PaymentType> PaymentTypes { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<User>().HasData(new User[]
                 {
                     new User
                     {
-                            UserId = 1,
-                            Name = "Ross Morgan",
-                            Email = "ross.morgan@example.com",
-                            Seller = false,
-                            Password = "SecurePassword123"
+                        Id = 1, 
+                        Uid = "", 
+                        FirstName = "Ross", 
+                        LastName = "Morgan", 
+                        UserName = "rmorgan", 
+                        Address = "334 South Street", 
+                        Email = "ross.m@coding.com", 
+                        Seller = false
                     },
                     new User
                     {
-                            UserId = 2,
-                            Name = "Andrew Smith",
-                            Email = "andrew.smith@example.com",
-                            Seller = false,
-                            Password = "AnotherSecurePassword456"
+                        Id = 2,
+                        Uid = "",
+                        FirstName = "Andrew",
+                        LastName = "Smith",
+                        UserName = "mastercoder",
+                        Address = "567 North Street",
+                        Email = "asmith@coding.com",
+                        Seller = true
                     }
 
                 });
@@ -36,51 +47,64 @@ namespace Bangazon_BE
         {
                 ProductId = 1,
                 Title = "Wireless Bluetooth Headphones",
-                ImageUrl = "https://media.post.rvohealth.io/2bjbp5lKTXFqsC1IaBRaVKnftUC/2024/02/23/2clpfwiF94A9rR20V9ES0nyh03C.jpeg",
+                ImageUrl = "https://m.media-amazon.com/images/I/41JACWT-wWL._AC_UF894,1000_QL80_.jpg",
                 Description = "High-quality noise-cancelling headphones with 30 hours of battery life.",
                 Price = 199.99m,
                 QuantityAvailable = 50,
-                UserId = 2,
-        },
+                Uid = "",
+                CategoryId = 2,
+                SellerId = 1,
+    },
         new Product
         {
                 ProductId = 2,
-                Title = "4K Ultra HD Monitor",
-                ImageUrl = "https://cdn.thewirecutter.com/wp-content/media/2023/06/4kmonitors-2048px-9794.jpg",
-                Description = "27-inch monitor with vibrant colors and fast response time, perfect for gaming and productivity.",
-                Price = 349.99m,
+                Title = "Nike Shoes",
+                ImageUrl = "https://static.nike.com/a/images/t_PDP_936_v1/f_auto,q_auto:eco/b1bcbca4-e853-4df7-b329-5be3c61ee057/NIKE+DUNK+LOW+RETRO.png",
+                Description = "This athletic shoe combines style and performance, featuring a lightweight design with breathable mesh uppers for maximum ventilation.",
+                Price = 89.99m,
                 QuantityAvailable = 30,
-                UserId = 1,
+                Uid = "",
+                CategoryId = 3,
+                SellerId = 1,
+
         },
         new Product
         {
                 ProductId = 3,
                 Title = "Mechanical Gaming Keyboard",
-                ImageUrl = "https://m.media-amazon.com/images/I/61+O1VNp1-L._AC_UF894,1000_QL80_.jpg",
+                ImageUrl = "https://hyperx.com/cdn/shop/files/hyperx_alloy_origins_us_1_top_down.jpg?v=1723777809",
                 Description = "RGB backlit keyboard with customizable keys and fast response switches.",
                 Price = 129.99m,
                 QuantityAvailable = 75,
-                UserId = 1,
+                Uid = "",
+                CategoryId = 2,
+                SellerId = 1,
+
         },
         new Product
         {
                 ProductId = 4,
-                Title = "High-Performance Gaming Laptop",
-                ImageUrl = "https://i.pcmag.com/imagery/reviews/043DROGFihmSgG7S6LUb006-1..v1709854231.jpg",
-                Description = "15.6-inch gaming laptop with Intel i7 processor, 16GB RAM, and NVIDIA GTX 1660 Ti graphics card.",
-                Price = 1199.99m,
+                Title = "Watch",
+                ImageUrl = "https://fossil.scene7.com/is/image/FossilPartners/BQ2457_main?$sfcc_fos_large$",
+                Description = "\r\nThis sleek and stylish watch is the perfect blend of form and function. Featuring a durable stainless steel case and a scratch-resistant crystal, it is designed to withstand everyday wear while maintaining its elegant look. .",
+                Price = 119.99m,
                 QuantityAvailable = 20,
-                UserId = 1,
+                Uid = "",
+                CategoryId = 1,
+                SellerId = 2,
         },
         new Product
         {
                 ProductId = 5,
-                Title = "Wireless Charging Pad",
-                ImageUrl = "https://m.media-amazon.com/images/I/51YD0CM1PnL._AC_UF894,1000_QL80_.jpg",
-                Description = "Fast wireless charger compatible with all Qi-enabled devices.",
+                Title = "Weird Lookin Pants",
+                ImageUrl = "https://i.ebayimg.com/images/g/BEcAAOSwlVpgXpQy/s-l1200.jpg",
+                Description = "These versatile pants are designed for both comfort and style, making them a perfect addition to any wardrobe.",
                 Price = 39.99m,
                 QuantityAvailable = 100,
-                UserId = 2,
+                Uid = "",
+                CategoryId = 2,
+                SellerId = 2,
+
         }
     });
             modelBuilder.Entity<Order>().HasData(new Order[]
@@ -89,23 +113,72 @@ namespace Bangazon_BE
         {
                 OrderId = 1,
                 OrderDate = new DateTime(2024, 8, 15),
-                TotalAmount = 199.99m,
-                UserId = 1,
-                PaymentType = "Debit",
-                Status = true,
+                Uid = "P9QrdmZ8cRV98APa11FmObGBjiu2",
+                PaymentTypeId = 1,
+                OrderComplete = true,
     },
 
         new Order
         {
-            OrderId = 2,
-            OrderDate = new DateTime(2024, 8, 18),
-            TotalAmount = 349.99m,
-            UserId = 2,
-            PaymentType = "Credit",
-            Status = false,
+                OrderId = 2,
+                OrderDate = new DateTime(2024, 8, 18),
+                Uid = "P9QrdmZ8cRV98APa11FmObGBjiu2",
+                PaymentTypeId = 2,
+                OrderComplete = true,
+        },
+                new Order
+        {
+                OrderId = 3,
+                OrderDate = new DateTime(2024, 8, 18),
+                Uid = "P9QrdmZ8cRV98APa11FmObGBjiu2",
+                PaymentTypeId = 2,
+                OrderComplete = false,
         }
     });
+            modelBuilder.Entity<Category>().HasData(new Category[]
+            {
+                new Category
+                {
+                    Id = 1,
+                    Name = "Accessories"
+                },
+                
+                new Category
+                {
+                    Id = 2,
+                    Name = "Electronics"
+                },
+                
+                new Category
+                {
+                    Id = 3,
+                    Name = "Shoes"
+                },
+                new Category
+                {
+                    Id = 4,
+                    Name = "Clothes"
+                }
+
+            });
+
+            modelBuilder.Entity<PaymentType>().HasData(new PaymentType[]
+            {
+        new PaymentType { Id = 1, Type = "Credit Card" },
+        new PaymentType { Id = 2, Type = "PayPal" }
+            });
+
+
+
+
+
+            modelBuilder.Entity<Order>()
+           .HasMany(order => order.Products)
+           .WithMany(product => product.Orders)
+           .UsingEntity(x => x.ToTable("OrderProduct"));
+
         }
+
         public BangazonDbContext(DbContextOptions<BangazonDbContext> context) : base(context)
         {
 
